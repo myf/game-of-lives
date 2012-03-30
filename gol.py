@@ -1,15 +1,18 @@
 #!/usr/local/bin/python3.3
 from time import sleep
 import sys
+import pyglet
+w=pyglet.window.Window()
 
-R = 45
-C = 45
+R = 28
+C = 28
 
 def create_matrix(r, c):
     return [[0 for i in range(r)] for j in range(c)]
 
 matrix = create_matrix(R, C)
 
+"""
 matrix[0][2] = 1
 matrix[1][0] = 1
 matrix[1][2] = 1
@@ -51,13 +54,13 @@ matrix[41][3] = 1
 matrix[41][4] = 1
 matrix[40][4] = 1
 matrix[39][3] = 1
+"""
 
-
-
-
-
-
-
+matrix[7][7] = 1
+matrix[7][8] = 1
+matrix[7][9] = 1
+matrix[7][10] = 1
+matrix[7][11] = 1
 def wrap(r, c, R=R, C=C):
     return (r % R, c % C)
 
@@ -90,23 +93,51 @@ def generate_next(matrix):
                 next[row][cell] = 1
     return next
 count = 0
-while 1:
 
+
+"""
+while 1:
     for line in matrix:
-        
-        sys.stdout.write("%s \n" % line)
+        printmat = [None for i in xrange(len(line))]
+        for i in xrange(len(line)):
+            if line[i] == 0:
+                printmat[i] = ' '
+            elif line[i] == 1:
+                printmat[i] = 'X'
+        printmat = "".join(printmat)
+        sys.stdout.write("%s \n" % printmat)
 #        sys.stdout.write("\r" % line)
-        sys.stdout.seek(0)
+        #sys.stdout.seek(0)
         #sys.stdout.flush()
     sys.stdout.write('%d \n' % count)
-    
-    sys.stdout.seek(0)
-    
+    #sys.stdout.seek(0)
     matrix = generate_next(matrix)
-    sleep(.01)
+    sleep(.1)
     count += 1
-    
-            
+"""
+ratio = min(w.width, w.height)/len(matrix)
+@w.event
+def on_draw():
+    for i in xrange(len(matrix)):
+        for j in xrange(len(matrix[i])):
+            if matrix[i][j] == 0:
+                color = 255
+            if matrix[i][j] == 1:
+                color =0
+            pyglet.graphics.draw(1, pyglet.gl.GL_POINTS,
+                                ('v2i', (i*ratio, j*ratio)),
+                                ('c3B', (color, color, color))
+                                )
+    #count+=1
+def update(dt):
+    global matrix;
+    matrix = generate_next(matrix)
+
+pyglet.clock.schedule(update)
+pyglet.clock.set_fps_limit(600)
+pyglet.gl.glPointSize(ratio)
+pyglet.app.run()
+
 
 # Any live cell with fewer than two live neighbours dies, as if caused by under-population.
 # Any live cell with two or three live neighbours lives on to the next generation.
